@@ -25,7 +25,7 @@ def encrypt(originalFile, key):
 # delete that unwanted slave file
     os.system("rm {}".format(t))
     e = []
-#encrypt using our key, pretty standard
+#encrypt using our key 
     for b in range(len(pay_content)):
         singlebyte = pay_content[b]
         for i in range(len(key)):
