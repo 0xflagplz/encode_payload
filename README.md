@@ -1,4 +1,4 @@
-# encode_payload
+# XOR bin payload via key
 
 takes bin payload encryptes with provided key.
 C++ function to decode
