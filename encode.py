@@ -89,13 +89,13 @@ if __name__ == '__main__':
 		quit()
 
 	print("[*] MD5 hash of the initial shellcode: [{}]".format(MD5.new(shellcodeBytes).hexdigest()))
-	print("[*] Shellcode size: [{}] bytes".format(len(shellcodeBytes)))
+	print("[*] Original Shellcode size: [{}] bytes".format(len(shellcodeBytes)))
 
 
 	#------------------------------------------------------------------------
 	# Display formated output
 	
-	print("[*] Add to C++ code file")
+	print("\n\n[*] Add the following to C++ code file")
 	print "\n==================================== XOR C++ Code ====================================\n"
 	masterKey = args.key
 	print("[*] XOR encoding the shellcode with key [{}]".format(masterKey))
