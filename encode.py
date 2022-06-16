@@ -52,11 +52,11 @@ def aesEncrypt(clearText, key):
 def formatCPP(data, key, cipherType):
 	shellcode = "\\x"
 	shellcode += "\\x".join(format(ord(b),'02x') for b in data)
-	print 'char encryptedShellcode[] = "' + shellcode +'"'
+	print 'char encryptedShellcode[] = "' + shellcode +'";'
 
-	print 'char key[] = "' + key +'"'
+	print 'char key[] = "' + key +'";'
 
-	print 'char cipherType[] = "' + cipherType + '"'
+	print 'char cipherType[] = "' + cipherType + '";'
 	
 
 #------------------------------------------------------------------------
