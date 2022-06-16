@@ -11,9 +11,6 @@ import os
 
 # Crypto Functions
 #------------------------------------------------------------------------
-# data as a bytearray
-# key as a string
-
 def xor(data, key):
 	l = len(key)
 	keyAsInt = map(ord, key)
@@ -47,8 +44,6 @@ def aesEncrypt(clearText, key):
 
 # Output Formating
 
-#------------------------------------------------------------------------
-# data as a bytearray
 def formatCPP(data, key, cipherType):
 	shellcode = "\\x"
 	shellcode += "\\x".join(format(ord(b),'02x') for b in data)
@@ -59,8 +54,6 @@ def formatCPP(data, key, cipherType):
 	print 'char cipherType[] = "' + cipherType + '";'
 	
 
-#------------------------------------------------------------------------
-# data as a bytearray
 def formatB64(data):
 	return b64encode(data)
 
@@ -69,15 +62,12 @@ def formatB64(data):
 # Main Function
 
 if __name__ == '__main__':
-	#------------------------------------------------------------------------
 	# Parse arguments
 	parser = argparse.ArgumentParser()
 	parser.add_argument("shellcodeFile", help="File name containing the raw shellcode to be encoded/encrypted")
         parser.add_argument("key", help="Key used to transform (XOR or AES encryption) the shellcode")
 	args = parser.parse_args() 
 
-
-	#------------------------------------------------------------------------
 	# Open shellcode file and read all bytes from it
 	try:
 		with open(args.shellcodeFile) as shellcodeFileHandle:
@@ -92,7 +82,6 @@ if __name__ == '__main__':
 	print("[*] Original Shellcode size: [{}] bytes".format(len(shellcodeBytes)))
 
 
-	#------------------------------------------------------------------------
 	# Display formated output
 	
 	print("\n\n[*] Add the following to C++ code file")
