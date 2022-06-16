@@ -112,6 +112,6 @@ if __name__ == '__main__':
 	print "     j++;	\n" 
 	print "}\n"
 
-	print("\n============================= here is the Base64 string bc why not =============================\n")		
+	print("\n============================= Base64 String =============================\n")		
 	print formatB64(transformedShellcode)
 	print ""
