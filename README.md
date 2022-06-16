@@ -1,7 +1,7 @@
 #Get encryption output for payload via key
 
 takes bin payload encryptes with provided key.
-C++ function to decrypt
+C++ function to decode
 
 (Python2)
 >python encode.py shellcodefile key
