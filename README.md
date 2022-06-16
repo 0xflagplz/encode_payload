@@ -13,6 +13,7 @@ C++ function to decode
 
 Output Example:
 > msfvenom -p windows/x64/exec CMD=calc.exe -f raw -o file.bin
+
 > python encode.py file.bin 123abc
 
 ```
