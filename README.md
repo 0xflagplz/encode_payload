@@ -1,6 +1,6 @@
 #Get encryption output for payload via key
 
-takes bin payload encryptes with provided key.
+takes bin payload encode with provided key.
 C++ function to decode
 
 (Python2)
