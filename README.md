@@ -1,4 +1,11 @@
-#Get encryption output for payload via key
+# Installation
+Python 2.7 
+> git clone https://github.com/AchocolatechipPancake/encode_payload.git
+> sudo apt update
+> sudo apt install python-pip
+> pip2 install -r requirements
+
+##Get encryption output for payload via key
 
 takes bin payload encode with provided key.
 C++ function to decode
@@ -11,7 +18,7 @@ C++ function to decode
 >python encode.py poc.bin sa89ydsa
 
 
-Output Example:
+#Output Example:
 > msfvenom -p windows/x64/exec CMD=calc.exe -f raw -o file.bin
 
 > python encode.py file.bin 123abc
