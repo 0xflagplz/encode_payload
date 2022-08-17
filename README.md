@@ -1,9 +1,9 @@
-# Installation
-Python 2.7 
-> git clone https://github.com/AchocolatechipPancake/encode_payload.git
-> sudo apt update
-> sudo apt install python-pip
-> pip2 install -r requirements
+# Installation   
+Python 2.7    
+> git clone https://github.com/AchocolatechipPancake/encode_payload.git    
+> sudo apt update   
+> sudo apt install python-pip   
+> pip2 install -r requirements    
 
 ##Get encryption output for payload via key
 
